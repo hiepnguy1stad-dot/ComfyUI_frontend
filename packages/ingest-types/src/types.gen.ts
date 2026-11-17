@@ -3140,6 +3140,20 @@ export type BillingEventsResponse = {
 }
 
 /**
+ * The plan a Platform billing tab continues to checkout with. Selections only; checkout prices them.
+ */
+export type BillingHandoffCheckoutRequest = {
+  /**
+   * Plan the checkout opens with, as GET /api/billing/plans names it. Sent in the entry URL's query as `plan`.
+   */
+  plan_slug: string
+  /**
+   * Team credit stop the checkout opens with, for a per-credit Team plan. Sent in the entry URL's query as `team_credit_stop_id`.
+   */
+  team_credit_stop_id?: string
+}
+
+/**
  * Asks for a one-time handoff that signs a billing receiver tab in as the caller.
  */
 export type BillingHandoffCreateRequest = {
@@ -13242,6 +13256,49 @@ export type CreateBillingHandoffResponses = {
 
 export type CreateBillingHandoffResponse =
   CreateBillingHandoffResponses[keyof CreateBillingHandoffResponses]
+
+export type CreateBillingHandoffCheckoutData = {
+  body: BillingHandoffCheckoutRequest
+  path?: never
+  query?: never
+  url: '/api/auth/handoffs/checkout'
+}
+
+export type CreateBillingHandoffCheckoutErrors = {
+  /**
+   * `INVALID_REQUEST`: plan_slug is missing, or plan_slug or team_credit_stop_id is not 1 to 128 letters, digits, `_` or `-`
+   */
+  400: ErrorResponse
+  /**
+   * `INVALID_CREDENTIAL`: no scoped-session bearer, or the session or its source sign-in has ended
+   */
+  401: ErrorResponse
+  /**
+   * `CREDENTIAL_UNSUPPORTED`: the session is not a Platform billing tab's; `BILLING_FORBIDDEN`: the request did not come from the Platform origin, or the user no longer owns the workspace; `HANDOFF_DISABLED`, or another billing policy refusal
+   */
+  403: ErrorResponse
+  /**
+   * Too many handoffs for this sign-in, client address or user in the last hour
+   */
+  429: ErrorResponse
+  /**
+   * `SERVICE_UNAVAILABLE`: the billing policy could not be checked
+   */
+  503: ErrorResponse
+}
+
+export type CreateBillingHandoffCheckoutError =
+  CreateBillingHandoffCheckoutErrors[keyof CreateBillingHandoffCheckoutErrors]
+
+export type CreateBillingHandoffCheckoutResponses = {
+  /**
+   * Handoff issued. `entry_url` is billing-web's handoff page with `intent=checkout`, `plan` and `team_credit_stop_id` (if any) in the query and the token in the fragment.
+   */
+  201: BillingHandoffCreateResponse
+}
+
+export type CreateBillingHandoffCheckoutResponse =
+  CreateBillingHandoffCheckoutResponses[keyof CreateBillingHandoffCheckoutResponses]
 
 export type ExchangeBillingHandoffData = {
   body: BillingHandoffExchangeRequest
