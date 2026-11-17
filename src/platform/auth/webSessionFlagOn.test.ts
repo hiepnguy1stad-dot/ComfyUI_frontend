@@ -3667,6 +3667,30 @@ describe('an SSO account with no Firebase login (sso_enabled)', () => {
       sessionReads: ['GET', 'GET'],
       onSession: true,
       sessionOnlyUserId: 'user-a'
+    },
+    {
+      name: 'SSO on: no session falls back to the key',
+      sso: true,
+      session: 'none',
+      sessionReads: ['GET'],
+      onSession: false,
+      sessionOnlyUserId: undefined
+    },
+    {
+      name: 'SSO on: a revoked session falls back to the key',
+      sso: true,
+      session: 'revoked',
+      sessionReads: ['GET'],
+      onSession: false,
+      sessionOnlyUserId: undefined
+    },
+    {
+      name: 'SSO off: the key wins without reading the session',
+      sso: false,
+      session: { userId: 'user-a' },
+      sessionReads: [],
+      onSession: false,
+      sessionOnlyUserId: undefined
     }
   ])(
     'boot with a stored API key: $name',

@@ -1843,7 +1843,6 @@ describe('a stored API key while Firebase restores the saved sign-in', () => {
         return vi.fn()
       }
     )
-    vi.mocked(useFeatureFlags().flags).unifiedCloudAuthEnabled = true
   })
 
   it('sends no credential before Firebase has answered', async () => {
