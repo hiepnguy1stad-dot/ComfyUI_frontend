@@ -43,6 +43,7 @@ import {
 import { useApp } from '@/scripts/appInstance'
 import { isGraphLoading } from '@/core/graph/graphLoadState'
 import { clipspace } from '@/scripts/clipspace'
+import { travelFocusedNodeHistory } from '@/scripts/focusedNodeHistory'
 
 function clone<T>(obj: T): T {
   return JSON.parse(JSON.stringify(obj))
@@ -738,6 +739,9 @@ export class ChangeTracker implements WorkflowChangeTracker {
 
         // The layer editor has its own session-local undo history
         if (useDialogStore().isDialogOpen(LAYER_EDITOR_DIALOG_KEY)) return
+
+        const shortcut = historyShortcut(e)
+        if (shortcut && travelFocusedNodeHistory(shortcut)) return
 
         keyIgnored =
           e.key === 'Control' ||

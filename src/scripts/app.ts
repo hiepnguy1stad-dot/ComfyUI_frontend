@@ -146,7 +146,6 @@ import { useNodeReplacementStore } from '@/platform/workflowErrors/nodeReplaceme
 import type { MissingNodeType } from '@/platform/workflowErrors/nodeReplacement/types'
 
 import { useSubgraphNavigationStore } from '@/stores/subgraphNavigationStore'
-import { useSubgraphStore } from '@/stores/subgraphStore'
 import { useWidgetStore } from '@/stores/widgetStore'
 import { useWorkspaceStore } from '@/stores/workspaceStore'
 import type {
@@ -1005,8 +1004,6 @@ export class ComfyApp implements IComfyApp {
     await bootstrapTracer.settle('bootstrap/sync-workflows', () =>
       useWorkspaceStore().workflow.syncWorkflows()
     )
-    //Doesn't need to block. Blueprints will load async
-    void useSubgraphStore().fetchSubgraphs()
 
     this.addProcessKeyHandler()
     this.addConfigureHandler()
@@ -1071,8 +1068,6 @@ export class ComfyApp implements IComfyApp {
         }
       }
     )
-
-    this.rootGraph.start()
 
     // Ensure the canvas fills the window
     useResizeObserver(this.canvasElRef, ([canvasEl]) => {
@@ -2001,6 +1996,7 @@ export class ComfyApp implements IComfyApp {
           try {
             api.authToken = comfyOrgAuthToken
             api.apiKey = comfyOrgApiKey ?? undefined
+            executionErrorStore.recordNodeErrors(null, queuedRunErrorKey)
             const res = await api.queuePrompt(number, p, {
               partialExecutionTargets: queueNodeIds,
               previewMethod
@@ -2018,9 +2014,10 @@ export class ComfyApp implements IComfyApp {
                 ...(workflowContext && { workflowContext })
               })
             }
-            executionErrorStore.recordNodeErrors(
-              res.node_errors ?? null,
-              queuedRunErrorKey
+            executionErrorStore.recordSubmissionNodeErrors(
+              res.node_errors,
+              queuedRunErrorKey,
+              res.prompt_id
             )
             queueResultOverride = null
             try {
